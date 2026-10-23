@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>诗画</title>
+  <link rel="preload" href="fonts/MaShanZheng.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="view" id="view">
+      <img id="bg" alt="" />
+      <canvas id="fx"></canvas>
+    </div>
+    <div class="paper"></div>
+    <div class="vignette"></div>
+
+    <section class="poem" id="poem"></section>
+    <p class="caption" id="caption"></p>
+
+    <button class="arrow prev" id="prev" title="上一首（←）">&#8249;</button>
+    <button class="arrow next" id="next" title="下一首（→）">&#8250;</button>
+
+    <a class="game-link" href="game.html" title="看图猜诗：看画面，选古诗">
+      <span class="gl-seal">猜</span><span class="gl-txt">看图猜诗</span><span class="gl-go">&#8250;</span>
+    </a>
+
+    <div class="tools">
+      <button id="btnRecite" title="诗词朗诵（R）">诵<span class="st"> · 关</span></button>
+      <button id="btnSound" title="开启/关闭环境声（S）">声<span class="st"> · 关</span></button>
+      <button id="btnShuffle" title="随机顺序（X）">随机<span class="st"> · 关</span></button>
+      <button id="btnAuto" title="自动轮播（空格）">轮播<span class="st"> · 关</span></button>
+      <button id="btnFs" title="全屏（F）">全屏</button>
+    </div>
+    <button class="nav" id="nav" title="目录（M）"><span class="ttl"></span><span class="idx"></span><span class="menu">目录</span></button>
+
+    <div id="catalog">
+      <div class="cat-head">
+        <h2>诗歌七十五首</h2>
+        <a class="cat-game" href="game.html">看图猜诗 &#8250;</a>
+        <button id="catClose" title="关闭（Esc）">&#215;</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div id="veil"><span class="loading">研墨中…</span></div>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/poems.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/recite.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

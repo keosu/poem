@@ -1,0 +1,8 @@
+/* 马善政楷书（SIL OFL 1.1），已裁成本站用字 + GB2312 一级常用字，见 agent-tools/font_subset.py */
+@font-face {
+  font-family: "Ma Shan Zheng";
+  src: url("../fonts/MaShanZheng.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}

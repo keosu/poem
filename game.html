@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>看图猜诗 · 诗画</title>
+  <link rel="preload" href="fonts/MaShanZheng.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+  <div id="game">
+    <div class="stage" id="stage">
+      <img id="full" alt="" />
+      <div class="strips" id="strips"></div>
+      <canvas id="fx"></canvas>
+    </div>
+    <div class="paper"></div>
+    <div class="vignette"></div>
+
+    <header class="hud">
+      <a class="back" href="index.html" title="返回诗画">&#8249; 诗画</a>
+      <div class="round" id="round"></div>
+      <div class="right">
+        <span class="score">得分 <b id="score">0</b></span>
+        <button id="btnRecite" title="答题后朗诵这首诗（R）">诵<span class="st"> · 关</span></button>
+        <button id="btnSound" title="开启/关闭声音（S）">声<span class="st"> · 关</span></button>
+        <button id="btnFs" title="全屏（F）">全屏</button>
+      </div>
+    </header>
+    <div class="rows" id="rows"></div>
+
+    <section class="panel" id="panel">
+      <div class="view ask" id="ask">
+        <p class="q">这幅画画的是哪首诗？</p>
+        <p class="hint">画面正一行一行显现，越早作答得分越高</p>
+        <button class="primary" id="btnGuess">我猜到了 <kbd>回车</kbd></button>
+      </div>
+      <div class="view choose" id="choose">
+        <p class="q">选出这幅画对应的诗</p>
+        <div class="opts" id="opts"></div>
+      </div>
+      <div class="view result" id="result">
+        <p class="verdict" id="verdict"></p>
+        <div class="poem" id="poem"></div>
+        <button class="primary" id="btnNext">下一题 <kbd>回车</kbd></button>
+      </div>
+    </section>
+
+    <section class="screen intro-screen" id="start">
+      <img class="intro-bg" id="introBg" alt="" />
+      <div class="intro">
+        <div class="intro-text">
+          <div class="brand">
+            <h1>看图猜诗</h1>
+            <span class="stamp">诗画</span>
+          </div>
+          <p class="sub">诗歌七十五首 · 以画识诗 · 每局十题</p>
+          <ol class="steps">
+            <li><i>一</i><b>画卷徐展</b><span>画面一行一行显现</span></li>
+            <li><i>二</i><b>四选其一</b><span>选出画的是哪首诗</span></li>
+            <li><i>三</i><b>先猜多得</b><span>越早答对，得分越高</span></li>
+          </ol>
+          <div class="go">
+            <button class="primary big" id="btnStart">开 始<kbd>回车</kbd></button>
+            <span class="best" id="best"></span>
+          </div>
+          <p class="keys">支持鼠标、触屏、键盘与遥控器：方向键选择 · 确定作答 · 1–4 直接选</p>
+        </div>
+        <figure class="teaser">
+          <div class="scroll">
+            <div class="rod"></div>
+            <div class="frame"><div class="t-strips" id="teaser"></div></div>
+            <div class="rod"></div>
+          </div>
+          <figcaption id="teaserCap"><span class="q">这是哪首诗？</span><span class="a"></span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="screen" id="end">
+      <div class="card wide">
+        <h1 id="endTitle"></h1>
+        <p id="endStat"></p>
+        <div class="recap" id="recap"></div>
+        <div class="btns">
+          <button class="primary big" id="btnAgain">再来一局 <kbd>回车</kbd></button>          <a class="ghost" href="index.html">返回诗画</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/poems.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/recite.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
