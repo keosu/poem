@@ -977,12 +977,37 @@ const ORDER = [
   'shihuiyin', 'zhushi', 'suojian', 'cunju', 'jihaizashi',
 ];
 
-// 定制场景（scenes.js）与模块化场景按课标顺序合并，每项都带 img 与 create(env)
+// 目录筛选用的主题，按此顺序显示
+const TOPIC_NAMES = ['山水', '春景', '田园', '思乡', '送别', '边塞', '爱国', '咏物', '童趣', '哲理', '节日'];
+
+const TOPICS = {
+  jiangnan: ['田园'], changgexing: ['哲理'], chilege: ['山水'], yonge: ['咏物', '童趣'],
+  feng: ['咏物'], yongliu: ['咏物', '春景'], huixiangoushu: ['思乡'], liangzhouci1: ['边塞'],
+  dengguanquelou: ['山水', '哲理'], chunxiao: ['春景'], liangzhouci2: ['边塞'], chusai: ['边塞'],
+  furonglou: ['送别'], luzhai: ['山水'], songyuaner: ['送别'], jiuyuejiuri: ['思乡', '节日'],
+  jingyesi: ['思乡'], gulangyuexing: ['童趣'], pubu: ['山水'], zengwanglun: ['送别'],
+  huanghelou: ['送别'], zaofabaidicheng: ['山水'], wangtianmenshan: ['山水'], biedongda: ['送别'],
+  jueju1: ['春景', '山水'], chunyexiyu: ['春景'], jueju2: ['春景'], jiangpan: ['春景'],
+  fengqiao: ['思乡'], chuzhouxijian: ['山水'], youziyin: ['思乡'], zaochun: ['春景'],
+  yugezi: ['山水'], saixiaqu: ['边塞'], wangdongting: ['山水'], langtaosha: ['山水'],
+  caoyuan: ['送别', '哲理'], chishang: ['童趣'], yijiangnan: ['山水', '春景'], xiaoerchuidiao: ['童趣'],
+  minnong1: ['田园'], minnong2: ['田园'], xunyinzhe: ['山水'], jiangxue: ['山水'],
+  qingming: ['节日'], jiangnanchun: ['春景'], shanxing: ['山水'], mifeng: ['咏物', '哲理'],
+  jiangshangyuzhe: ['田园'], yuanri: ['节日'], bochuanguazhou: ['思乡'], shuhuyin: ['田园'],
+  wanghulou: ['山水'], yinhushang: ['山水'], huichong: ['春景'], tixilinbi: ['山水', '哲理'],
+  xiarijueju: ['爱国'], sanqu: ['山水'], shier: ['爱国'], qiuye: ['爱国'],
+  tianyuan1: ['田园'], tianyuan2: ['田园'], xiaochi: ['咏物'], jingcisi: ['山水', '送别'],
+  chunri: ['春景', '哲理'], guanshu: ['哲理'], tilinandi: ['爱国'], youyuanbuzhi: ['春景'],
+  xiangcunsiyue: ['田园'], momei: ['咏物'], shihuiyin: ['咏物'], zhushi: ['咏物'],
+  suojian: ['童趣'], cunju: ['童趣', '春景'], jihaizashi: ['爱国'],
+};
+
+// 定制场景（scenes.js）与模块化场景按课标顺序合并，每项都带 img、topics 与 create(env)
 function sceneList() {
   const byId = new Map();
   for (const s of SCENES) byId.set(s.id, s);
   for (const p of POEMS) {
     byId.set(p.id, { ...p, img: `assets/${p.id}.jpg`, create: (env) => createFx(env, p.fx) });
   }
-  return ORDER.map((id) => byId.get(id));
+  return ORDER.map((id) => ({ ...byId.get(id), topics: TOPICS[id] || [] }));
 }

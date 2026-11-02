@@ -208,6 +208,74 @@
     card.onclick = () => { closeCatalog(); go(i); };
     grid.appendChild(card);
   });
+
+  // --- 目录筛选：朝代、主题为小标签，诗人较多用下拉 ---
+  const filter = { dynasty: '', topic: '', poet: '' };
+  const fPoet = $('fPoet'), fCount = $('fCount');
+  const fEmpty = document.createElement('p');
+  fEmpty.className = 'fempty';
+  fEmpty.textContent = '没有符合条件的诗';
+  grid.after(fEmpty);
+  const match = (s, f) => (!f.dynasty || s.dynasty === f.dynasty)
+    && (!f.topic || s.topics.includes(f.topic)) && (!f.poet || s.author === f.poet);
+
+  function chips(el, key, values) {
+    for (const v of ['', ...values]) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (v ? '' : ' on');
+      b.textContent = v || '全部';
+      b.dataset.v = v;
+      b.onclick = () => setFilter(key, v);
+      el.appendChild(b);
+    }
+  }
+  chips($('fDynasty'), 'dynasty', [...new Set(LIST.map((s) => s.dynasty))]);
+  chips($('fTopic'), 'topic', TOPIC_NAMES);
+
+  function fillPoets() {
+    const counts = new Map();
+    for (const s of LIST) if (!filter.dynasty || s.dynasty === filter.dynasty) counts.set(s.author, (counts.get(s.author) || 0) + 1);
+    if (!counts.has(filter.poet)) filter.poet = '';
+    fPoet.innerHTML = '<option value="">全部</option>' + [...counts].map(([p, n]) =>
+      `<option value="${p}"${p === filter.poet ? ' selected' : ''}>${p}${n > 1 ? ' · ' + n : ''}</option>`).join('');
+  }
+  fPoet.onchange = () => setFilter('poet', fPoet.value);
+
+  function setFilter(key, v) {
+    filter[key] = v;
+    if (key === 'dynasty') fillPoets();
+    applyFilter();
+  }
+
+  function applyFilter() {
+    let n = 0;
+    LIST.forEach((s, i) => {
+      const ok = match(s, filter);
+      grid.children[i].classList.toggle('hide', !ok);
+      if (ok) n++;
+    });
+    // 标签上标出在其余条件下已无结果的选项
+    for (const [id, key] of [['fDynasty', 'dynasty'], ['fTopic', 'topic']]) {
+      $(id).querySelectorAll('.chip').forEach((c) => {
+        const v = c.dataset.v;
+        c.classList.toggle('on', v === filter[key]);
+        c.classList.toggle('empty', !!v && !LIST.some((s) => match(s, { ...filter, [key]: v })));
+      });
+    }
+    fPoet.parentElement.classList.toggle('on', !!filter.poet);
+    const any = filter.dynasty || filter.topic || filter.poet;
+    fCount.innerHTML = any ? `${n} 首<button class="fclear" title="清除筛选">清除</button>` : `共 ${n} 首`;
+    fEmpty.classList.toggle('show', n === 0);
+  }
+  fCount.addEventListener('click', (e) => {
+    if (!e.target.classList.contains('fclear')) return;
+    filter.dynasty = filter.topic = filter.poet = '';
+    fillPoets();
+    applyFilter();
+  });
+  fillPoets();
+  applyFilter();
+
   function openCatalog() {
     catalog.classList.add('open');
     const on = grid.children[idx];

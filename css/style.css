@@ -247,7 +247,46 @@ body {
   transition: opacity .45s;
 }
 #catalog.open { opacity: 1; pointer-events: auto; }
-.cat-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 2vh; }
+.cat-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 1.2vh; }
+
+/* 目录筛选 */
+.filters {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 0;
+  padding: 0 4px 1.8vh;
+  font-family: "STKaiti", "KaiTi", "楷体", serif;
+}
+.fg { display: flex; align-items: center; gap: 2px; flex: none; }
+.fg + .fg { margin-left: 14px; padding-left: 14px; border-left: 1px solid rgba(255, 248, 235, .12); }
+.fl { font-size: 12px; letter-spacing: .2em; color: rgba(255, 248, 235, .4); margin-right: 6px; }
+.chip, .fsel select {
+  all: unset; cursor: pointer;
+  padding: 1px 9px; border-radius: 999px;
+  font-size: 13px; line-height: 20px; letter-spacing: .08em;
+  color: rgba(255, 248, 235, .66);
+  transition: color .2s, background .2s, opacity .2s;
+}
+.chip:hover, .fsel select:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.chip.on, .fsel.on select {
+  color: #f8ebdc; background: rgba(176, 40, 31, .88);
+  box-shadow: inset 0 0 0 1px rgba(248, 235, 220, .3);
+}
+.chip.empty { opacity: .28; }
+.fsel { position: relative; display: inline-flex; }
+.fsel select { padding-right: 22px; background: rgba(255, 255, 255, .05); }
+.fsel select option { color: #2a231e; background: #f6efe0; }
+.fsel::after {
+  content: "▾"; position: absolute; right: 8px; top: 50%; transform: translateY(-52%);
+  font-size: 10px; color: rgba(255, 248, 235, .55); pointer-events: none;
+}
+.fcount { margin-left: auto; padding-left: 14px; font-size: 12px; letter-spacing: .12em; color: rgba(255, 248, 235, .45); white-space: nowrap; }
+.fclear {
+  all: unset; cursor: pointer; margin-left: 8px; padding: 0 8px; border-radius: 999px;
+  color: rgba(255, 248, 235, .7); box-shadow: inset 0 0 0 1px rgba(255, 248, 235, .25);
+}
+.fclear:hover { color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 248, 235, .6); }
+.card.hide { display: none; }
+.fempty { display: none; text-align: center; padding: 8vh 0; color: rgba(255, 248, 235, .45); font-size: 18px; letter-spacing: .3em; }
+.fempty.show { display: block; }
 .cat-head h2 { font-weight: normal; font-size: 26px; letter-spacing: .4em; color: rgba(255, 248, 235, .9); }
 #catClose {
   all: unset; cursor: pointer;
@@ -334,6 +373,15 @@ body {
   .tools button { padding: 5px 11px; }
   .gl-txt { font-size: 15px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .cat-head h2 { font-size: 20px; letter-spacing: .2em; white-space: nowrap; }
+  .cat-game { padding: 5px 12px; font-size: 14px; letter-spacing: .1em; margin-right: 6px; }
+  .filters {
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 1.4vh;
+    -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, #000 88%, transparent);
+  }
+  .filters::-webkit-scrollbar { display: none; }
+  .fcount { margin-left: 14px; }
   .poem { left: 5vw; }
   .caption { left: 5vw; bottom: 13vh; letter-spacing: .25em; }
 }
