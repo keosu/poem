@@ -8,7 +8,7 @@
   const $ = (id) => document.getElementById(id);
   const stage = $('stage'), full = $('full'), strips = $('strips'), canvas = $('fx'), ctx = canvas.getContext('2d');
   const panel = $('panel'), opts = $('opts'), rowsEl = $('rows');
-  const LIST = sceneList();
+  const LIST = collectPoems();
 
   const shuffle = (a) => {
     a = a.slice();

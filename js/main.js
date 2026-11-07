@@ -11,7 +11,16 @@
   const catalog = $('catalog'), grid = $('grid');
   const ctx = canvas.getContext('2d');
 
-  const LIST = sceneList();
+  // 地址栏指向未开启的卷中某首时，先把那一卷打开，避免链到空白
+  (() => {
+    const id = location.hash.replace(/^#/, '');
+    const hit = id && allPoems().find((s) => s.id === id);
+    if (!hit) return;
+    const libs = poemLibs();
+    if (!libs[hit.lib]) { libs[hit.lib] = true; savePoemLibs(libs); }
+  })();
+
+  let LIST = collectPoems();
 
   const env = {
     W: 0, H: 0, dw: 0, dh: 0, ox: 0, oy: 0, k: 1,
@@ -57,7 +66,11 @@
     const af = Math.max(12, Math.min(H * 0.021, 22));
     const byH = availH / (len * 1.3 + 1.3);
     const byW = (availW - tf * 1.6 - af * 3) / (rows * 2.15);
-    const fs = Math.max(14, Math.min(H * 0.047, 50, byH, byW));
+    const long = rows > 16;
+    poemEl.classList.toggle('long', long);
+    const fs = long
+      ? Math.max(17, Math.min(H * 0.03, 26, byH))
+      : Math.max(14, Math.min(H * 0.047, 50, byH, byW));
     poemEl.style.setProperty('--tf', Math.min(tf, fs * 1.6).toFixed(1) + 'px');
     poemEl.style.setProperty('--af', af.toFixed(1) + 'px');
     poemEl.style.setProperty('--fs', fs.toFixed(1) + 'px');
@@ -199,19 +212,13 @@
     if (btnAuto.classList.contains('on')) autoTimer = setInterval(next, AUTO_INTERVAL);
   }
 
-  // --- 目录 ---
-  LIST.forEach((s, i) => {
-    const card = document.createElement('button');
-    card.className = 'card';
-    card.innerHTML = `<img loading="lazy" alt="" src="assets/thumb/${s.id}.jpg" />`
-      + `<span class="no">${i + 1}</span><b>${s.title}</b><i>${s.dynasty}·${s.author}${s.subtitle ? ' · ' + s.subtitle : ''}</i>`;
-    card.onclick = () => { closeCatalog(); go(i); };
-    grid.appendChild(card);
-  });
-
-  // --- 目录筛选：朝代、主题为小标签，诗人较多用下拉 ---
+  // --- 目录。三卷可任选组合，筛选只在已选的卷里进行 ---
+  const TOPIC_ORDER = [...TOPIC_NAMES, '怀古', '爱情', '羁旅'];
+  const DYNASTY_ORDER = ['先秦', '汉', '晋', '南朝', '北朝', '唐', '五代', '宋', '元', '明', '清', '近代'];
+  const juanCount = Object.fromEntries(POEM_JUAN.map((j) => [j.id, allPoems().filter((s) => s.lib === j.id).length]));
   const filter = { dynasty: '', topic: '', poet: '' };
-  const fPoet = $('fPoet'), fCount = $('fCount');
+  const fCount = $('fCount');
+  const DROPS = [['fDynasty', 'dynasty'], ['fTopic', 'topic'], ['fPoet', 'poet']];
   const fEmpty = document.createElement('p');
   fEmpty.className = 'fempty';
   fEmpty.textContent = '没有符合条件的诗';
@@ -219,31 +226,47 @@
   const match = (s, f) => (!f.dynasty || s.dynasty === f.dynasty)
     && (!f.topic || s.topics.includes(f.topic)) && (!f.poet || s.author === f.poet);
 
-  function chips(el, key, values) {
+  // 筛选收成三个小按钮，点开是一张浮签
+  function chips(group, key, values, note = {}) {
+    const el = group.querySelector('.fpop');
+    el.innerHTML = '';
     for (const v of ['', ...values]) {
       const b = document.createElement('button');
-      b.className = 'chip' + (v ? '' : ' on');
-      b.textContent = v || '全部';
+      b.className = 'chip';
+      b.innerHTML = (v || '全部') + (note[v] > 1 ? `<small>${note[v]}</small>` : '');
       b.dataset.v = v;
       b.onclick = () => setFilter(key, v);
       el.appendChild(b);
     }
   }
-  chips($('fDynasty'), 'dynasty', [...new Set(LIST.map((s) => s.dynasty))]);
-  chips($('fTopic'), 'topic', TOPIC_NAMES);
 
   function fillPoets() {
     const counts = new Map();
     for (const s of LIST) if (!filter.dynasty || s.dynasty === filter.dynasty) counts.set(s.author, (counts.get(s.author) || 0) + 1);
     if (!counts.has(filter.poet)) filter.poet = '';
-    fPoet.innerHTML = '<option value="">全部</option>' + [...counts].map(([p, n]) =>
-      `<option value="${p}"${p === filter.poet ? ' selected' : ''}>${p}${n > 1 ? ' · ' + n : ''}</option>`).join('');
+    chips($('fPoet'), 'poet', [...counts.keys()], Object.fromEntries(counts));
   }
-  fPoet.onchange = () => setFilter('poet', fPoet.value);
+
+  function closeDrops(except) {
+    for (const [id] of DROPS) if ($(id) !== except) $(id).classList.remove('open');
+  }
+  for (const [id] of DROPS) {
+    const d = $(id);
+    d.querySelector('.fbtn').onclick = () => {
+      closeDrops(d);
+      const pop = d.querySelector('.fpop');
+      pop.style.left = '';
+      if (!d.classList.toggle('open')) return;
+      const over = pop.getBoundingClientRect().right - (innerWidth - 12);
+      if (over > 0 && getComputedStyle(d).position === 'relative') pop.style.left = `${-over}px`;
+    };
+  }
+  catalog.addEventListener('click', (e) => { if (!e.target.closest('.fdrop')) closeDrops(); });
 
   function setFilter(key, v) {
     filter[key] = v;
     if (key === 'dynasty') fillPoets();
+    closeDrops();
     applyFilter();
   }
 
@@ -254,15 +277,16 @@
       grid.children[i].classList.toggle('hide', !ok);
       if (ok) n++;
     });
-    // 标签上标出在其余条件下已无结果的选项
-    for (const [id, key] of [['fDynasty', 'dynasty'], ['fTopic', 'topic']]) {
-      $(id).querySelectorAll('.chip').forEach((c) => {
+    for (const [id, key] of DROPS) {
+      const d = $(id);
+      d.querySelectorAll('.chip').forEach((c) => {
         const v = c.dataset.v;
         c.classList.toggle('on', v === filter[key]);
         c.classList.toggle('empty', !!v && !LIST.some((s) => match(s, { ...filter, [key]: v })));
       });
+      d.classList.toggle('on', !!filter[key]);
+      d.querySelector('.fbtn').textContent = filter[key] || d.dataset.label;
     }
-    fPoet.parentElement.classList.toggle('on', !!filter.poet);
     const any = filter.dynasty || filter.topic || filter.poet;
     fCount.innerHTML = any ? `${n} 首<button class="fclear" title="清除筛选">清除</button>` : `共 ${n} 首`;
     fEmpty.classList.toggle('show', n === 0);
@@ -273,8 +297,75 @@
     fillPoets();
     applyFilter();
   });
-  fillPoets();
-  applyFilter();
+
+  function paintJuan() {
+    const el = $('juan');
+    el.innerHTML = '';
+    const libs = poemLibs();
+    const only = POEM_JUAN.filter((j) => libs[j.id]).length === 1;
+    for (const j of POEM_JUAN) {
+      const b = document.createElement('button');
+      const on = libs[j.id];
+      b.className = 'juan-b' + (on ? ' on' : '') + (on && only ? ' last' : '');
+      b.title = `${j.hint}课标 ${juanCount[j.id]} 首` + (on && only ? '，至少保留一卷' : '');
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.innerHTML = `<b>${j.name}</b><i>${cnNum(juanCount[j.id])}首</i>`;
+      b.onclick = () => toggleLib(j.id, b);
+      el.appendChild(b);
+    }
+  }
+
+  function rebuildCatalog() {
+    grid.innerHTML = '';
+    LIST.forEach((s, i) => {
+      const card = document.createElement('button');
+      card.className = 'card';
+      card.innerHTML = `<img loading="lazy" alt="" src="assets/thumb/${s.id}.jpg" />`
+        + `<span class="no">${i + 1}</span><b>${s.title}</b><i>${s.dynasty}·${s.author}${s.subtitle ? ' · ' + s.subtitle : ''}</i>`;
+      card.onclick = () => { closeCatalog(); go(i); };
+      grid.appendChild(card);
+    });
+    const dyn = DYNASTY_ORDER.filter((d) => LIST.some((s) => s.dynasty === d));
+    if (filter.dynasty && !dyn.includes(filter.dynasty)) filter.dynasty = '';
+    const topics = TOPIC_ORDER.filter((t) => LIST.some((s) => s.topics.includes(t)));
+    if (filter.topic && !topics.includes(filter.topic)) filter.topic = '';
+    chips($('fDynasty'), 'dynasty', dyn);
+    chips($('fTopic'), 'topic', topics);
+    paintJuan();
+    fillPoets();
+    applyFilter();
+    const on = grid.children[idx];
+    if (on) on.classList.add('on');
+  }
+
+  function toggleLib(id, btn) {
+    const libs = poemLibs();
+    if (libs[id] && POEM_JUAN.filter((j) => libs[j.id]).length === 1) {
+      btn.classList.remove('nudge');
+      void btn.offsetWidth;
+      btn.classList.add('nudge');
+      return;
+    }
+    libs[id] = !libs[id];
+    savePoemLibs(libs);
+    const cur = LIST[idx] && LIST[idx].id;
+    LIST = collectPoems();
+    queue = [];
+    back.length = 0;
+    const ni = LIST.findIndex((s) => s.id === cur);
+    rebuildCatalog();
+    if (ni >= 0) {
+      idx = ni;
+      navEl.querySelector('.idx').textContent = `${ni + 1} / ${LIST.length}`;
+      grid.querySelectorAll('.card.on').forEach((c) => c.classList.remove('on'));
+      if (grid.children[ni]) grid.children[ni].classList.add('on');
+    } else {
+      idx = -1;
+      go(0);
+    }
+  }
+
+  rebuildCatalog();
 
   function openCatalog() {
     catalog.classList.add('open');
@@ -332,7 +423,9 @@
 
   addEventListener('keydown', (e) => {
     if (catalog.classList.contains('open')) {
-      if (e.key === 'Escape' || e.key === 'm' || e.key === 'M') closeCatalog();
+      const drop = document.querySelector('.fdrop.open');
+      if (e.key === 'Escape' && drop) drop.classList.remove('open');
+      else if (e.key === 'Escape' || e.key === 'm' || e.key === 'M') closeCatalog();
       return;
     }
     if (e.key === 'ArrowRight' || e.key === 'PageDown') next();
@@ -355,7 +448,9 @@
   addEventListener('touchstart', wake, { passive: true });
 
   let touchX = null;
-  addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchstart', (e) => {
+    touchX = e.target.closest('.poem.long') ? null : e.touches[0].clientX;
+  }, { passive: true });
   addEventListener('touchend', (e) => {
     if (touchX == null || catalog.classList.contains('open')) return;
     const dx = e.changedTouches[0].clientX - touchX;

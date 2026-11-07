@@ -36,20 +36,17 @@
     </div>
     <button class="nav" id="nav" title="目录（M）"><span class="ttl"></span><span class="idx"></span><span class="menu">目录</span></button>
 
-    <div id="catalog">
-      <div class="cat-head">
-        <h2>诗歌七十五首</h2>
+    <div id="catalog" role="dialog" aria-label="目录">
+      <div class="cat-bar">
+        <div class="juan" id="juan" role="group" aria-label="选卷，可多选"></div>
+        <div class="filters" id="filters">
+          <div class="fdrop" id="fDynasty" data-label="朝代"><button class="fbtn" aria-haspopup="true"></button><div class="fpop"></div></div>
+          <div class="fdrop" id="fTopic" data-label="主题"><button class="fbtn" aria-haspopup="true"></button><div class="fpop"></div></div>
+          <div class="fdrop" id="fPoet" data-label="诗人"><button class="fbtn" aria-haspopup="true"></button><div class="fpop"></div></div>
+          <span class="fcount" id="fCount"></span>
+        </div>
         <a class="cat-game" href="game.html">看图猜诗 &#8250;</a>
         <button id="catClose" title="关闭（Esc）">&#215;</button>
-      </div>
-      <div class="filters" id="filters">
-        <div class="fg" id="fDynasty"><span class="fl">朝代</span></div>
-        <div class="fg" id="fTopic"><span class="fl">主题</span></div>
-        <div class="fg">
-          <span class="fl">诗人</span>
-          <label class="fsel"><select id="fPoet"></select></label>
-        </div>
-        <span class="fcount" id="fCount"></span>
       </div>
       <div class="grid" id="grid"></div>
     </div>
@@ -61,6 +58,8 @@
   <script src="js/scenes.js"></script>
   <script src="js/fx.js"></script>
   <script src="js/poems.js"></script>
+  <script src="js/extended.js"></script>
+  <script src="js/extended-senior.js"></script>
   <script src="js/voice.js"></script>
   <script src="js/recite.js"></script>
   <script src="js/main.js"></script>
